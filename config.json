@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "gmail": {
+      "command": "npx",
+      "args": [
+        "@gongrzhe/server-gmail-autoauth-mcp"
+      ],
+      "transport": "stdio"
+    }
+  }
+}

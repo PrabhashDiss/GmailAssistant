@@ -5,9 +5,25 @@ from langgraph_supervisor import create_supervisor
 
 from custom_agent import CustomAgent
 from langgraph.prebuilt import create_react_agent
+import json
+import asyncio
+from langchain_mcp_adapters.client import MultiServerMCPClient
 
 model = ChatOpenAI(model="openai/gpt-oss-120b", temperature=0.0,
                    base_url="https://api.groq.com/openai/v1")
+
+
+async def get_mcp_tools():
+    # Load MCP configuration
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+
+    # Initialize MCP client and get tools
+    mcp_client = MultiServerMCPClient(config["mcpServers"])
+    return await mcp_client.get_tools()
+
+# Get MCP tools synchronously
+mcp_tools = asyncio.run(get_mcp_tools())
 
 # Math agent: Handles mathematical problems and calculations
 # Uses LangGraph's ReAct framework to provide step-by-step mathematical solutions
@@ -26,6 +42,7 @@ general_agent = CustomAgent(
     description="Agent for general questions",
     model=model,
     system_prompt="You provide assistance with general queries. Give short and direct answers.",
+    tool_functions=mcp_tools,
 ).graph
 
 # LangGraph's inbuilt supervisor agent: Coordinates between math and general agents
