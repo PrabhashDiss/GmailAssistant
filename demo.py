@@ -28,14 +28,13 @@ async def get_mcp_tools():
 # Get MCP tools synchronously
 mcp_tools = asyncio.run(get_mcp_tools())
 
-# Math agent: Handles mathematical problems and calculations
-# Uses LangGraph's ReAct framework to provide step-by-step mathematical solutions
-math_agent = create_react_agent(
-    name="math",
-    tools=[],
+# Gmail agent: Handles Gmail tasks via MCP tools
+# Uses LangGraph's ReAct framework and MCP toolset for Gmail operations
+gmail_agent = create_react_agent(
+    name="gmail",
+    tools=mcp_tools,
     model=model,
-    prompt="You provide help with math problems. Explain your reasoning at each step and include examples. \
-        If prompted for anything else you refuse to answer.",
+    prompt="You are a Gmail assistant. Use the MCP tools to read, compose, send, and manage emails. Ask clarifying questions only when necessary. Refuse non-Gmail unrelated tasks.",
 )
 
 # General agent: General agent for all queries
@@ -52,10 +51,10 @@ general_agent = CustomAgent(
 # Routes queries to the appropriate specialized agent based on the question type
 triage_agent = create_supervisor(
     model=model,
-    agents=[math_agent, general_agent],
+    agents=[gmail_agent, general_agent],
     prompt=(
         "You are a supervisor managing two agents:\n"
-        "- a math agent. Assign math-related tasks to this agent\n"
+        "- a Gmail agent. Assign Gmail-related tasks (read, compose, send, manage emails) to this agent\n"
         "- a general agent. Assign general tasks to this agent\n"
         "Assign work to one agent at a time, do not call agents in parallel.\n"
         "Do not do any work yourself. \n"
@@ -63,7 +62,7 @@ triage_agent = create_supervisor(
     ),
 ).compile(name="triage")
 
-LangGraphModule([triage_agent, math_agent, general_agent])
+LangGraphModule([triage_agent, gmail_agent, general_agent])
 
 if __name__ == "__main__":
     CLI.main()
