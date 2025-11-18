@@ -9,13 +9,16 @@ import json
 import asyncio
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
-model = ChatOpenAI(model="openai/gpt-oss-120b", temperature=0.0,
-                   base_url="https://api.groq.com/openai/v1")
+model = ChatOpenAI(
+    model="openai/gpt-oss-120b",
+    temperature=0.0,
+    base_url="https://api.groq.com/openai/v1",
+)
 
 
 async def get_mcp_tools():
     # Load MCP configuration
-    with open('config.json', 'r') as f:
+    with open("config.json", "r") as f:
         config = json.load(f)
 
     # Initialize MCP client and get tools
